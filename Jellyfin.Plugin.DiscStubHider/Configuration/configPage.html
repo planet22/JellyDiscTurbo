@@ -5,57 +5,158 @@
     <title>Disc Stub Hider Settings</title>
 </head>
 <body>
-    <div id="DiscStubHiderConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="loading,formhelper,emby-checkbox,emby-select,emby-button">
+    <div id="DiscStubHiderConfigPage" data-role="page" class="page type-interior pluginConfigurationPage">
+        <style>
+            #DiscStubHiderConfigPage {
+                /* Sourced from Jellyfin's own active theme (--jf-palette-* is set by jellyfin-web's
+                   MUI theming per the theme chosen in Settings > Display); the values after each
+                   comma are fallbacks for older servers that don't expose these variables. */
+                --dsh-bg: var(--jf-palette-background-default, #1c1624);
+                --dsh-surface: var(--jf-palette-background-paper, #251d2e);
+                --dsh-text: var(--jf-palette-text-primary, #f1ecf7);
+                --dsh-text-muted: var(--jf-palette-text-secondary, #b6a5c6);
+                --dsh-text-faint: color-mix(in srgb, var(--dsh-text-muted) 65%, transparent);
+                --dsh-border: var(--jf-palette-divider, #453a54);
+                --dsh-border-soft: color-mix(in srgb, var(--dsh-border) 70%, transparent);
+                --dsh-row: color-mix(in srgb, var(--dsh-surface) 94%, var(--dsh-text) 6%);
+                --dsh-accent: var(--jf-palette-primary-main, #c084e0);
+                --dsh-accent-strong: var(--jf-palette-primary-light, color-mix(in srgb, var(--dsh-accent) 80%, white));
+                --dsh-accent-soft: color-mix(in srgb, var(--dsh-accent) 16%, var(--dsh-surface));
+                --dsh-accent-contrast: var(--jf-palette-primary-contrastText, #241436);
+                --dsh-accent2: var(--jf-palette-secondary-main, #4fc3ec);
+                --dsh-accent2-soft: color-mix(in srgb, var(--dsh-accent2) 18%, var(--dsh-surface));
+                --dsh-radius-lg: 18px;
+                --dsh-radius-md: 13px;
+                --dsh-radius-sm: 9px;
+                --dsh-radius-pill: 999px;
+                --dsh-shadow: 0 1px 2px rgba(0,0,0,.35), 0 14px 34px rgba(0,0,0,.45);
+                font-family: "Segoe UI", Roboto, system-ui, sans-serif;
+            }
+            #DiscStubHiderConfigPage .dsh-shell * { box-sizing: border-box; }
+            #DiscStubHiderConfigPage .dsh-shell {
+                max-width: 720px;
+                margin: 0 auto;
+                background: var(--dsh-bg);
+                color: var(--dsh-text);
+                border-radius: var(--dsh-radius-lg);
+                border: 1px solid var(--dsh-border-soft);
+                overflow: hidden;
+            }
+            #DiscStubHiderConfigPage h1, #DiscStubHiderConfigPage h2 { font-family: inherit; margin: 0; color: var(--dsh-text); }
+
+            #DiscStubHiderConfigPage .dsh-header { display: flex; align-items: center; gap: 12px; padding: 20px 24px; border-bottom: 1px solid var(--dsh-border-soft); background: var(--dsh-surface); }
+            #DiscStubHiderConfigPage .dsh-brand-mark { width: 38px; height: 38px; border-radius: 11px; background: linear-gradient(155deg, var(--dsh-accent), var(--dsh-accent-strong)); color: var(--dsh-accent-contrast); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+            #DiscStubHiderConfigPage .dsh-brand-mark svg { width: 20px; height: 20px; }
+            #DiscStubHiderConfigPage .dsh-header h1 { font-size: 18px; font-weight: 700; }
+            #DiscStubHiderConfigPage .dsh-header p { margin: 2px 0 0; font-size: 11.5px; color: var(--dsh-text-muted); }
+
+            #DiscStubHiderConfigPage .dsh-body { padding: 20px 24px 24px; }
+
+            #DiscStubHiderConfigPage .dsh-card { background: var(--dsh-surface); border: 1px solid var(--dsh-border-soft); border-radius: var(--dsh-radius-lg); box-shadow: var(--dsh-shadow); padding: 16px 18px; margin-bottom: 16px; }
+            #DiscStubHiderConfigPage .dsh-card-head { margin-bottom: 4px; }
+            #DiscStubHiderConfigPage .dsh-card-head h2 { font-size: 13px; font-weight: 700; letter-spacing: .01em; }
+            #DiscStubHiderConfigPage .dsh-card-head .hint { display: block; margin-top: 2px; font-size: 11px; color: var(--dsh-text-faint); font-weight: 600; }
+
+            #DiscStubHiderConfigPage .dsh-switch-row { display: flex; align-items: flex-start; gap: 12px; padding: 13px 0; border-top: 1px solid var(--dsh-border-soft); }
+            #DiscStubHiderConfigPage .dsh-switch-row:first-of-type { border-top: 0; padding-top: 10px; }
+            #DiscStubHiderConfigPage .dsh-switch { position: relative; display: inline-flex; flex-shrink: 0; margin-top: 2px; }
+            #DiscStubHiderConfigPage .dsh-switch input { position: absolute; opacity: 0; width: 36px; height: 20px; margin: 0; cursor: pointer; }
+            #DiscStubHiderConfigPage .dsh-switch .track { width: 36px; height: 20px; border-radius: var(--dsh-radius-pill); background: var(--dsh-row); border: 1px solid var(--dsh-border); position: relative; transition: background .12s; }
+            #DiscStubHiderConfigPage .dsh-switch .track::after { content:''; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:var(--dsh-text-faint); transition: transform .12s, background .12s; }
+            #DiscStubHiderConfigPage .dsh-switch input:checked + .track { background: var(--dsh-accent); border-color: var(--dsh-accent); }
+            #DiscStubHiderConfigPage .dsh-switch input:checked + .track::after { transform: translateX(16px); background: #fff; }
+            #DiscStubHiderConfigPage .dsh-switch-text { flex: 1; }
+            #DiscStubHiderConfigPage .dsh-switch-text .lbl { font-size: 13px; font-weight: 700; cursor: pointer; }
+            #DiscStubHiderConfigPage .dsh-switch-text .desc { margin-top: 3px; font-size: 11.5px; line-height: 1.5; color: var(--dsh-text-muted); }
+
+            #DiscStubHiderConfigPage .dsh-banner { padding: 12px 16px; border-radius: var(--dsh-radius-md); background: var(--dsh-accent2-soft); border: 1px solid color-mix(in srgb, var(--dsh-accent2) 35%, transparent); display: flex; align-items: flex-start; gap: 10px; font-size: 11.5px; line-height: 1.5; color: var(--dsh-text); margin-bottom: 16px; }
+            #DiscStubHiderConfigPage .dsh-banner svg { width: 16px; height: 16px; color: var(--dsh-accent2); flex-shrink: 0; margin-top: 1px; }
+            #DiscStubHiderConfigPage .dsh-banner strong { color: var(--dsh-accent-strong); }
+
+            #DiscStubHiderConfigPage .dsh-field { padding-top: 4px; }
+            #DiscStubHiderConfigPage .dsh-field-label { font-size: 11px; color: var(--dsh-text-faint); font-weight: 700; margin-bottom: 6px; }
+            #DiscStubHiderConfigPage .dsh-select { width: 100%; background: var(--dsh-row); border: 1px solid var(--dsh-border); border-radius: var(--dsh-radius-sm); padding: 9px 32px 9px 13px; font-size: 12.5px; font-weight: 600; color: var(--dsh-text); appearance: none; -webkit-appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b6a5c6' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position: right 10px center; background-size: 12px; }
+            #DiscStubHiderConfigPage .dsh-field .desc { margin-top: 6px; font-size: 11.5px; line-height: 1.5; color: var(--dsh-text-muted); }
+
+            #DiscStubHiderConfigPage .dsh-footer { display: flex; justify-content: flex-end; }
+            #DiscStubHiderConfigPage .dsh-btn { display: inline-flex; align-items: center; gap: 7px; border-radius: var(--dsh-radius-pill); border: 1.5px solid var(--dsh-accent); background: var(--dsh-accent); color: var(--dsh-accent-contrast); padding: 9px 20px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+            #DiscStubHiderConfigPage .dsh-btn:hover { background: var(--dsh-accent-strong); border-color: var(--dsh-accent-strong); }
+            #DiscStubHiderConfigPage .dsh-btn svg { width: 14px; height: 14px; }
+        </style>
         <div data-role="content">
             <div class="content-primary">
-                <form id="DiscStubHiderConfigForm">
-                    <div class="sectionTitleContainerTitle">
-                        <h2>Disc Stub Hider Settings</h2>
-                    </div>
-
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label>
-                            <input is="emby-checkbox" type="checkbox" id="chkEnableLibraryEvents" />
-                            <span>Respond to library events</span>
-                        </label>
-                        <div class="fieldDescription">
-                            When enabled, ItemAdded / ItemRemoved / ItemUpdated events trigger stub evaluation.
-                            Disable this if you only want processing via scheduled tasks or folder watching.
+                <div class="dsh-shell">
+                    <div class="dsh-header">
+                        <div class="dsh-brand-mark">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"></circle></svg>
+                        </div>
+                        <div>
+                            <h1>Disc Stub Hider</h1>
+                            <p>Automatically clean up leftover .disc marker files once a real video has been found.</p>
                         </div>
                     </div>
 
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label>
-                            <input is="emby-checkbox" type="checkbox" id="chkEnableFolderWatch" />
-                            <span>Watch folders (FileSystemWatcher)</span>
-                        </label>
-                        <div class="fieldDescription">
-                            When enabled, creates FileSystemWatchers on directories so filesystem changes
-                            (Created / Deleted / Renamed) trigger stub evaluation. Disable this to avoid
-                            per-folder watchers; processing can still run via library events or scheduled tasks.
+                    <form id="DiscStubHiderConfigForm">
+                        <div class="dsh-body">
+                            <div class="dsh-card">
+                                <div class="dsh-card-head">
+                                    <h2>Triggers</h2>
+                                    <span class="hint">Choose what causes stub evaluation to run automatically</span>
+                                </div>
+
+                                <div class="dsh-switch-row">
+                                    <label class="dsh-switch">
+                                        <input type="checkbox" id="chkEnableLibraryEvents" />
+                                        <span class="track"></span>
+                                    </label>
+                                    <div class="dsh-switch-text">
+                                        <label class="lbl" for="chkEnableLibraryEvents">Respond to library events</label>
+                                        <div class="desc">When enabled, ItemAdded / ItemRemoved / ItemUpdated events trigger stub evaluation. Disable this if you only want processing via scheduled tasks or folder watching.</div>
+                                    </div>
+                                </div>
+
+                                <div class="dsh-switch-row">
+                                    <label class="dsh-switch">
+                                        <input type="checkbox" id="chkEnableFolderWatch" />
+                                        <span class="track"></span>
+                                    </label>
+                                    <div class="dsh-switch-text">
+                                        <label class="lbl" for="chkEnableFolderWatch">Watch folders (FileSystemWatcher)</label>
+                                        <div class="desc">When enabled, creates FileSystemWatchers on directories so filesystem changes (Created / Deleted / Renamed) trigger stub evaluation. Disable this to avoid per-folder watchers; processing can still run via library events or scheduled tasks.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dsh-banner">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"></path><circle cx="12" cy="12" r="9"></circle></svg>
+                                <span>If both triggers above are disabled, stub processing only runs when you execute the <strong>Scan and Hide Disc Stubs</strong> scheduled task, manually or on its own schedule.</span>
+                            </div>
+
+                            <div class="dsh-card">
+                                <div class="dsh-card-head">
+                                    <h2>Handling</h2>
+                                    <span class="hint">What to do with a .disc file once a parallel video is discovered</span>
+                                </div>
+                                <div class="dsh-field">
+                                    <div class="dsh-field-label">Handling mode</div>
+                                    <select class="dsh-select" id="selectHandlingMode" name="selectHandlingMode">
+                                        <option value="RenameToBackup">Rename to .disc.bak</option>
+                                        <option value="Ignore">Ignore / do nothing</option>
+                                    </select>
+                                    <div class="desc">Choose how .disc files are handled when a parallel video is discovered.</div>
+                                </div>
+                            </div>
+
+                            <div class="dsh-footer">
+                                <button type="submit" class="dsh-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                                    Save
+                                </button>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="fieldDescription" style="margin-bottom: 1.5em;">
-                        If both options above are disabled, stub processing only runs when you execute the
-                        <strong>Scan and Hide Disc Stubs</strong> scheduled task (manually or on its schedule).
-                    </div>
-
-                    <div class="selectContainer">
-                        <label class="selectLabel" for="selectHandlingMode">Handling Mode</label>
-                        <select is="emby-select" id="selectHandlingMode" name="selectHandlingMode">
-                            <option value="RenameToBackup">Rename to .disc.bak</option>
-                            <option value="Ignore">Ignore / Do Nothing</option>
-                        </select>
-                        <div class="fieldDescription">Choose how .disc files are handled when a parallel video is discovered.</div>
-                    </div>
-
-                    <div>
-                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
-                            <span>Save</span>
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
 

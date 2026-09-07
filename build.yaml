@@ -1,7 +1,7 @@
 ---
 name: "DiscStubHider"
 guid: "a5f8e6c2-421d-4eb7-bd0a-cf1176b92a54"
-version: "1.0.0.2"
+version: "1.0.0.3"
 targetAbi: "10.11.0.0"
 framework: "net9.0"
 overview: "Hides .disc stub files once a real video is present, and restores them if it's removed"
@@ -22,6 +22,9 @@ owner: "jellyfin"
 artifacts:
 - "Jellyfin.Plugin.DiscStubHider.dll"
 changelog: >
+  1.0.0.3 - Redesigned the plugin settings page with a themed, card-based
+  layout matching Jellyfin's active theme colors.
+
   1.0.0.2 - Initial release. Detects video files alongside .disc stubs and
   renames/restores the stub automatically, with configurable library-event,
   folder-watch, and scheduled-task triggers.

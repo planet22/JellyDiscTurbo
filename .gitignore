@@ -17,3 +17,5 @@ publish_out/
 # NuGet
 *.nupkg
 
+Configuration/configPage.backup.html
+
