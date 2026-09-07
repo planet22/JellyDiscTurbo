@@ -1,0 +1,19 @@
+# Build output
+bin/
+obj/
+output/
+publish/
+publish_out/
+
+# Windows Zone.Identifier metadata (WSL)
+*:Zone.Identifier
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# NuGet
+*.nupkg
+

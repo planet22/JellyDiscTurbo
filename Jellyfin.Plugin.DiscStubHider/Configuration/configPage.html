@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Disc Stub Hider Settings</title>
+</head>
+<body>
+    <div id="DiscStubHiderConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="loading,formhelper,emby-checkbox,emby-select,emby-button">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="DiscStubHiderConfigForm">
+                    <div class="sectionTitleContainerTitle">
+                        <h2>Disc Stub Hider Settings</h2>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="chkEnableLibraryEvents" />
+                            <span>Respond to library events</span>
+                        </label>
+                        <div class="fieldDescription">
+                            When enabled, ItemAdded / ItemRemoved / ItemUpdated events trigger stub evaluation.
+                            Disable this if you only want processing via scheduled tasks or folder watching.
+                        </div>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="chkEnableFolderWatch" />
+                            <span>Watch folders (FileSystemWatcher)</span>
+                        </label>
+                        <div class="fieldDescription">
+                            When enabled, creates FileSystemWatchers on directories so filesystem changes
+                            (Created / Deleted / Renamed) trigger stub evaluation. Disable this to avoid
+                            per-folder watchers; processing can still run via library events or scheduled tasks.
+                        </div>
+                    </div>
+
+                    <div class="fieldDescription" style="margin-bottom: 1.5em;">
+                        If both options above are disabled, stub processing only runs when you execute the
+                        <strong>Scan and Hide Disc Stubs</strong> scheduled task (manually or on its schedule).
+                    </div>
+
+                    <div class="selectContainer">
+                        <label class="selectLabel" for="selectHandlingMode">Handling Mode</label>
+                        <select is="emby-select" id="selectHandlingMode" name="selectHandlingMode">
+                            <option value="RenameToBackup">Rename to .disc.bak</option>
+                            <option value="Ignore">Ignore / Do Nothing</option>
+                        </select>
+                        <div class="fieldDescription">Choose how .disc files are handled when a parallel video is discovered.</div>
+                    </div>
+
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            (function () {
+                // IMPORTANT: You MUST change this GUID string to match the exact GUID in your Plugin.cs!
+                var DiscStubHiderPluginConfig = {
+                    pluginId: "a5f8e6c2-421d-4eb7-bd0a-cf1176b92a54"
+                };
+
+                function getPageElement() {
+                    return document.getElementById('DiscStubHiderConfigPage');
+                }
+
+                function safeHideLoading() {
+                    if (window.Dashboard && typeof window.Dashboard.hideLoadingMsg === 'function') {
+                        Dashboard.hideLoadingMsg();
+                    }
+                }
+
+                function safeShowLoading() {
+                    if (window.Dashboard && typeof window.Dashboard.showLoadingMsg === 'function') {
+                        Dashboard.showLoadingMsg();
+                    }
+                }
+
+                function applyCheckboxState(checkbox, checked) {
+                    checkbox.checked = !!checked;
+                    if (checkbox.dispatchEvent) {
+                        checkbox.dispatchEvent(new CustomEvent('change', { bubbles: true }));
+                    }
+                }
+
+                // Bind view initialization hooks
+                document.getElementById('DiscStubHiderConfigPage').addEventListener('viewinit', function (e) {
+                    var page = this;
+
+                    document.getElementById('DiscStubHiderConfigForm').addEventListener('submit', function (formEvent) {
+                        formEvent.preventDefault();
+                        safeShowLoading();
+
+                        ApiClient.getPluginConfiguration(DiscStubHiderPluginConfig.pluginId).then(function (config) {
+                            config.EnableLibraryEvents = document.getElementById('chkEnableLibraryEvents').checked;
+                            config.EnableFolderWatch = document.getElementById('chkEnableFolderWatch').checked;
+                            config.HandlingMode = document.getElementById('selectHandlingMode').value;
+
+                            // Drop legacy single-toggle property if present so it is not re-persisted.
+                            delete config.EnableAutomaticScanning;
+
+                            ApiClient.updatePluginConfiguration(DiscStubHiderPluginConfig.pluginId, config).then(function () {
+                                safeHideLoading();
+                                if (window.Dashboard && window.Dashboard.alert) {
+                                    Dashboard.alert({
+                                        message: "Settings saved successfully."
+                                    });
+                                }
+                            }).catch(function (err) {
+                                safeHideLoading();
+                                console.error('Failed to update plugin configuration:', err);
+                            });
+                        }).catch(function (err) {
+                            safeHideLoading();
+                            console.error('Failed to fetch plugin configuration for saving:', err);
+                        });
+
+                        return false;
+                    });
+                });
+
+                // Bind page visibility entry triggers
+                document.getElementById('DiscStubHiderConfigPage').addEventListener('pageshow', function (e) {
+                    safeShowLoading();
+                    var page = this;
+
+                    ApiClient.getPluginConfiguration(DiscStubHiderPluginConfig.pluginId).then(function (config) {
+                        var chkLibrary = document.getElementById('chkEnableLibraryEvents');
+                        var chkFolder = document.getElementById('chkEnableFolderWatch');
+                        var selectMode = document.getElementById('selectHandlingMode');
+
+                        // Migrate from legacy EnableAutomaticScanning if the new flags are absent.
+                        var libraryEnabled = (typeof config.EnableLibraryEvents === 'boolean')
+                            ? config.EnableLibraryEvents
+                            : (config.EnableAutomaticScanning !== false);
+                        var folderEnabled = (typeof config.EnableFolderWatch === 'boolean')
+                            ? config.EnableFolderWatch
+                            : (config.EnableAutomaticScanning !== false);
+
+                        applyCheckboxState(chkLibrary, libraryEnabled);
+                        applyCheckboxState(chkFolder, folderEnabled);
+                        selectMode.value = config.HandlingMode || "RenameToBackup";
+
+                        if (selectMode.dispatchEvent) {
+                            selectMode.dispatchEvent(new CustomEvent('change', { bubbles: true }));
+                        }
+
+                        // Always forcefully clear the global spinner context once asynchronous requests resolve
+                        safeHideLoading();
+                    }).catch(function (err) {
+                        safeHideLoading();
+                        console.error('Failed to load plugin configuration data metrics:', err);
+                    });
+                });
+            })();
+        </script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+---
+name: "DiscStubHider"
+guid: "a5f8e6c2-421d-4eb7-bd0a-cf1176b92a54"
+version: "1.0.0.2"
+targetAbi: "10.11.0.0"
+framework: "net9.0"
+overview: "Hides .disc stub files once a real video is present, and restores them if it's removed"
+description: >
+  Disc Stub Hider watches your library for folders that contain both a Jellyfin
+  .disc placeholder (used for physical DVD/Blu-ray entries) and an actual video
+  file (.strm, .mkv, .mp4, .avi, .mov, .wmv). When both are found, it renames the
+  .disc stub to .disc.bak so Jellyfin no longer displays the placeholder, letting
+  the real video take over playback. If the video is later removed, the stub is
+  automatically restored so the disc placeholder reappears.
+
+  Processing can run three ways, independently enabled in the plugin settings:
+  responding to library events (ItemAdded/ItemRemoved/ItemUpdated), watching
+  folders directly via FileSystemWatcher, and/or a scheduled task ("Scan and
+  Hide Disc Stubs") that can be run manually or on its weekly schedule.
+category: "General"
+owner: "jellyfin"
+artifacts:
+- "Jellyfin.Plugin.DiscStubHider.dll"
+changelog: >
+  1.0.0.2 - Initial release. Detects video files alongside .disc stubs and
+  renames/restores the stub automatically, with configurable library-event,
+  folder-watch, and scheduled-task triggers.

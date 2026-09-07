@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>Jellyfin.Plugin.DiscStubHider</RootNamespace>
+    <!-- Assembly Metadata -->
+    <AssemblyName>Jellyfin.Plugin.DiscStubHider</AssemblyName>
+    <Version>1.0.0.2</Version>
+    <!-- Strict Analysis Rules -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Nullable>enable</Nullable>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <CodeAnalysisRuleSet>../jellyfin.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Jellyfin.Common" Version="10.11.11">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Jellyfin.Controller" Version="10.11.11">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Jellyfin.Model" Version="10.11.11">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SerilogAnalyzer" Version="0.15.0" PrivateAssets="All" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="All" />
+    <PackageReference Include="SmartAnalyzers.MultithreadingAnalyzer" Version="1.1.31" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Configuration\configPage.html" />
+    <!-- Overriding the logical runtime layout path prevents internal mapping resource name collisions -->
+    <EmbeddedResource Include="Configuration\configPage.html">
+      <LogicalName>Jellyfin.Plugin.DiscStubHider.configPage.html</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
