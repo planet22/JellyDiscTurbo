@@ -1,7 +1,7 @@
 ---
 name: "DiscStubHider"
 guid: "a5f8e6c2-421d-4eb7-bd0a-cf1176b92a54"
-version: "1.0.0.3"
+version: "1.0.0.0"
 targetAbi: "12.0.0.0"
 framework: "net10.0"
 overview: "Hides .disc stub files once a real video is present, and restores them if it's removed"

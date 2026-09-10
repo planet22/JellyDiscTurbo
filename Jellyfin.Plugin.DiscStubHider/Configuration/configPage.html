@@ -49,6 +49,7 @@
             #DiscStubHiderConfigPage .dsh-brand-mark svg { width: 20px; height: 20px; }
             #DiscStubHiderConfigPage .dsh-header h1 { font-size: 18px; font-weight: 700; }
             #DiscStubHiderConfigPage .dsh-header p { margin: 2px 0 0; font-size: 11.5px; color: var(--dsh-text-muted); }
+            #DiscStubHiderConfigPage .dsh-header-version { margin-left: auto; font-family: "Consolas","SFMono-Regular",ui-monospace,monospace; font-size: 11px; font-weight: 700; color: var(--dsh-text-faint); flex-shrink: 0; align-self: flex-start; }
 
             #DiscStubHiderConfigPage .dsh-body { padding: 20px 24px 24px; }
 
@@ -95,6 +96,7 @@
                             <h1>Disc Stub Hider</h1>
                             <p>Automatically clean up leftover .disc marker files once a real video has been found.</p>
                         </div>
+                        <span class="dsh-header-version" id="DshVersion">&hellip;</span>
                     </div>
 
                     <form id="DiscStubHiderConfigForm">
@@ -183,6 +185,17 @@
                     }
                 }
 
+                function loadVersion() {
+                    ApiClient.getInstalledPlugins().then(function (plugins) {
+                        var plugin = plugins.find(function (p) { return p.Id && p.Id.toLowerCase() === DiscStubHiderPluginConfig.pluginId.toLowerCase(); });
+                        var el = document.getElementById('DshVersion');
+                        if (el) el.textContent = plugin && plugin.Version ? ('v' + plugin.Version) : '';
+                    }).catch(function () {
+                        var el = document.getElementById('DshVersion');
+                        if (el) el.textContent = '';
+                    });
+                }
+
                 function applyCheckboxState(checkbox, checked) {
                     checkbox.checked = !!checked;
                     if (checkbox.dispatchEvent) {
@@ -230,6 +243,8 @@
                 document.getElementById('DiscStubHiderConfigPage').addEventListener('pageshow', function (e) {
                     safeShowLoading();
                     var page = this;
+
+                    loadVersion();
 
                     ApiClient.getPluginConfiguration(DiscStubHiderPluginConfig.pluginId).then(function (config) {
                         var chkLibrary = document.getElementById('chkEnableLibraryEvents');
