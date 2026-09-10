@@ -19,7 +19,7 @@ namespace Jellyfin.Plugin.DiscStubHider
     /// evaluations of the same directory from racing each other, are the caller's responsibility
     /// (see <c>ServerEntryPoint</c>, which serializes calls per-directory).
     /// </remarks>
-    public static class StubEvaluator
+    public static partial class StubEvaluator
     {
         private static readonly HashSet<string> VideoExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -53,7 +53,8 @@ namespace Jellyfin.Plugin.DiscStubHider
                                 directory);
                         }
 
-                        logger.LogInformation("Video file found in {Dir}. Renaming stub {File} -> .disc.bak", directory, Path.GetFileName(stubPath));
+                        string stubFileName = Path.GetFileName(stubPath);
+                        LogStubHidden(logger, directory, stubFileName);
                         File.Move(stubPath, targetPath, overwrite: true);
                     }
                 }
@@ -72,7 +73,8 @@ namespace Jellyfin.Plugin.DiscStubHider
                                 directory);
                         }
 
-                        logger.LogInformation("No video files left in {Dir}. Restoring stub {File} -> .disc", directory, Path.GetFileName(backupPath));
+                        string backupFileName = Path.GetFileName(backupPath);
+                        LogStubRestored(logger, directory, backupFileName);
                         File.Move(backupPath, targetPath, overwrite: true);
                     }
                 }
@@ -82,5 +84,11 @@ namespace Jellyfin.Plugin.DiscStubHider
                 logger.LogError(ex, "Error processing stub file adjustments in directory: {Directory}", directory);
             }
         }
+
+        [LoggerMessage(Level = LogLevel.Information, Message = "Video file found in {Dir}. Renaming stub {File} -> .disc.bak")]
+        private static partial void LogStubHidden(ILogger logger, string dir, string file);
+
+        [LoggerMessage(Level = LogLevel.Information, Message = "No video files left in {Dir}. Restoring stub {File} -> .disc")]
+        private static partial void LogStubRestored(ILogger logger, string dir, string file);
     }
 }
