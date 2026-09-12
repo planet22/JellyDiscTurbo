@@ -186,11 +186,16 @@
                 }
 
                 function loadVersion() {
-                    ApiClient.getInstalledPlugins().then(function (plugins) {
-                        var plugin = plugins.find(function (p) { return p.Id && p.Id.toLowerCase() === DiscStubHiderPluginConfig.pluginId.toLowerCase(); });
+                    ApiClient.getInstalledPlugins().then(function (resp) {
+                        var plugins = Array.isArray(resp) ? resp : (resp && resp.Items) || [];
+                        var wantId = DiscStubHiderPluginConfig.pluginId.toLowerCase().replace(/-/g, '');
+                        var plugin = plugins.find(function (p) { return p.Id && p.Id.toLowerCase().replace(/-/g, '') === wantId; });
+                        if (!plugin) plugin = plugins.find(function (p) { return p.Name === 'Disc Stub Hider'; });
                         var el = document.getElementById('DshVersion');
                         if (el) el.textContent = plugin && plugin.Version ? ('v' + plugin.Version) : '';
-                    }).catch(function () {
+                        if (!plugin) console.warn('[DiscStubHider] Could not find plugin in getInstalledPlugins() response:', resp);
+                    }).catch(function (err) {
+                        console.error('[DiscStubHider] loadVersion error:', err);
                         var el = document.getElementById('DshVersion');
                         if (el) el.textContent = '';
                     });
